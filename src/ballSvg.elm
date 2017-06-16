@@ -6,9 +6,9 @@ import Keyboard exposing (..)
 import Char exposing (fromCode)
 import Json.Decode as Json
 import Html.Attributes exposing (..)
-import Random
 import Svg
 import Svg.Attributes
+import MovingOrb as Orb
 
 
 main : Program Never Model Msg
@@ -58,8 +58,6 @@ model =
 
 type Msg
     = KeyPress Int
-    | Kick
-    | NewVelocity Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -68,12 +66,6 @@ update msg model =
         -- Convert to key down and keyup then on tick add values
         KeyPress keyCode ->
             ( interpretKey keyCode model, Cmd.none )
-
-        Kick ->
-            ( model, Random.generate NewVelocity (Random.int 1 6) )
-
-        NewVelocity newVelocity ->
-            ( Model newVelocity newVelocity, Cmd.none )
 
 
 
@@ -84,20 +76,32 @@ interpretKey : Int -> Model -> Model
 interpretKey keyCode model =
     case fromCode keyCode of
         'a' ->
-            { model | velocityX = model.velocityX - 1 }
+            { model | velocityX = (increaseVelocity model.velocityX -1) }
 
         'w' ->
-            { model | velocityY = model.velocityY + 1 }
+            { model | velocityY = (increaseVelocity model.velocityY 1) }
 
         's' ->
-            { model | velocityY = model.velocityY - 1 }
+            { model | velocityY = (increaseVelocity model.velocityY -1) }
 
         'd' ->
-            { model | velocityX = model.velocityX + 1 }
+            { model | velocityX = (increaseVelocity model.velocityX 1) }
 
         -- For some reason, we don't catch arrow keys...growl
         _ ->
             model
+
+
+increaseVelocity : Int -> Int -> Int
+increaseVelocity lastVelocity additionalVelocity =
+    let
+        newVelocity =
+            lastVelocity + additionalVelocity
+    in
+        if (abs newVelocity) > 20 then
+            lastVelocity
+        else
+            newVelocity
 
 
 view : Model -> Html Msg
@@ -106,8 +110,8 @@ view model =
         [ div
             [ class "top-buffer", style [ ( "padding", "70px 0" ) ] ]
             [ squareDiv (velocityString model) 50
-            , button [ onClick Kick ] [ text "Kick" ]
             , lineFromModel model
+            , Orb.movingOrb model.velocityX model.velocityY
             ]
         ]
 
