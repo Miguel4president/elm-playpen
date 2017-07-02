@@ -110,7 +110,6 @@ view model =
         [ div
             [ class "top-buffer", style [ ( "padding", "70px 0" ) ] ]
             [ squareDiv (velocityString model) 50
-            , lineFromModel model
             , Orb.movingOrb model.velocityX model.velocityY
             ]
         ]
@@ -146,28 +145,3 @@ squareDiv content size =
 onKeyUp : (Int -> msg) -> Attribute msg
 onKeyUp tagger =
     on "keyup" (Json.map tagger keyCode)
-
-
-
--- <svg height="210" width="500">
---   <line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
--- </svg>
-
-
-lineFromModel : Model -> Html Msg
-lineFromModel model =
-    lineSvg 50 50 (50 + model.velocityX) (50 + model.velocityY)
-
-
-lineSvg : Int -> Int -> Int -> Int -> Html Msg
-lineSvg startX startY endX endY =
-    Svg.svg [ Svg.Attributes.viewBox "0 0 100 100", Svg.Attributes.width "300px" ]
-        [ Svg.line
-            [ Svg.Attributes.x1 (toString startX)
-            , Svg.Attributes.y1 (toString startY)
-            , Svg.Attributes.x2 (toString endX)
-            , Svg.Attributes.y2 (toString endY)
-            , Svg.Attributes.stroke "blue"
-            ]
-            []
-        ]
