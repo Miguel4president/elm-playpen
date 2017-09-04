@@ -90,14 +90,14 @@ update msg model =
         KeyDown keyNum ->
             let
                 newPhysics =
-                    Physics.keyDown keyNum model.physics
+                    Physics.updateKeys (Physics.Down keyNum) model.physics
             in
                 { model | physics = newPhysics } ! []
 
         KeyUp keyNum ->
             let
                 newPhysics =
-                    Physics.keyUp keyNum model.physics
+                    Physics.updateKeys (Physics.Up keyNum) model.physics
             in
                 { model | physics = newPhysics } ! []
 
@@ -106,42 +106,6 @@ type Msg
     = KeyDown Int
     | KeyUp Int
     | TimeDelta Time
-
-
-
--- update : Msg -> Model -> ( Model, Cmd Msg )
--- update msg model =
---     case msg of
---         -- Convert to key down and keyup then on tick add values
---         KeyPress keyCode ->
---             ( interpretKey keyCode model, Cmd.none )
--- VIEW
--- interpretKey : Int -> Model -> Model
--- interpretKey keyCode model =
---     case fromCode keyCode of
---         'a' ->
---             { model | velocityX = (increaseVelocity model.velocityX -1) }
---         'w' ->
---             { model | velocityY = (increaseVelocity model.velocityY 1) }
---         's' ->
---             { model | velocityY = (increaseVelocity model.velocityY -1) }
---         'd' ->
---             { model | velocityX = (increaseVelocity model.velocityX 1) }
---         -- For some reason, we don't catch arrow keys...growl
---         _ ->
---             model
-
-
-increaseVelocity : Int -> Int -> Int
-increaseVelocity lastVelocity additionalVelocity =
-    let
-        newVelocity =
-            lastVelocity + additionalVelocity
-    in
-        if (abs newVelocity) > 20 then
-            lastVelocity
-        else
-            newVelocity
 
 
 view : Model -> Html Msg

@@ -1,4 +1,4 @@
-module ClockTest.Physics exposing (Physics, init, update, keyDown, keyUp)
+module ClockTest.Physics exposing (Physics, init, update, updateKeys, Key(..))
 
 import Time exposing (Time)
 import Char exposing (fromCode)
@@ -39,11 +39,8 @@ type alias Velocity =
 
 
 type Key
-    = Down
-    | Left
-    | None
-    | Right
-    | Up
+    = Down Int
+    | Up Int
 
 
 type alias Keys =
@@ -64,7 +61,7 @@ init =
 
 
 
--- Updates
+-- UPDATES
 
 
 update : Time -> Physics -> Physics
@@ -82,11 +79,8 @@ updateLocation timeDelta ({ location, velocity } as current) =
 
         newY =
             location.y + (velocity.dy * timeDelta)
-
-        newLocation =
-            Location newX newY
     in
-        { current | location = newLocation }
+        { current | location = Location newX newY }
 
 
 updateVelocity : Time -> Physics -> Physics
@@ -104,78 +98,42 @@ updateVelocity timeDelta ({ velocity, acceleration, keys } as current) =
             velocity.dy
                 |> addIfTrue keys.up affectOfAcceleration
                 |> addIfTrue keys.down (affectOfAcceleration * -1)
-
-        newVelocity =
-            Velocity newDx newDy
     in
-        { current | velocity = newVelocity }
+        { current | velocity = Velocity newDx newDy }
 
 
 
 -- SETTERS!
 
 
-keyDown : Int -> Physics -> Physics
-keyDown keyNum ({ keys } as current) =
-    let
-        key =
-            interpretKey keyNum
-
-        newKeys =
-            updateKeys key True keys
-    in
-        { current | keys = newKeys }
-
-
-keyUp : Int -> Physics -> Physics
-keyUp keyNum ({ keys } as current) =
-    let
-        key =
-            interpretKey keyNum
-
-        newKeys =
-            updateKeys key False keys
-    in
-        { current | keys = newKeys }
-
-
-updateKeys : Key -> Bool -> Keys -> Keys
-updateKeys key pressed currentKeys =
+updateKeys : Key -> Physics -> Physics
+updateKeys key ({ keys } as current) =
     case key of
-        Down ->
-            { currentKeys | down = pressed }
+        Down keyCode ->
+            { current | keys = applyKeyChange keyCode True keys }
 
-        Left ->
-            { currentKeys | left = pressed }
-
-        Right ->
-            { currentKeys | right = pressed }
-
-        Up ->
-            { currentKeys | up = pressed }
-
-        None ->
-            currentKeys
+        Up keyCode ->
+            { current | keys = applyKeyChange keyCode False keys }
 
 
-interpretKey : Int -> Key
-interpretKey keyCode =
+applyKeyChange : Int -> Bool -> Keys -> Keys
+applyKeyChange keyCode pressed currentKeys =
     case fromCode keyCode of
         'A' ->
-            Left
+            { currentKeys | left = pressed }
 
         'W' ->
-            Up
+            { currentKeys | up = pressed }
 
         'S' ->
-            Down
+            { currentKeys | down = pressed }
 
         'D' ->
-            Right
+            { currentKeys | right = pressed }
 
         -- For some reason, we don't catch arrow keys...growl
         _ ->
-            None
+            currentKeys
 
 
 
