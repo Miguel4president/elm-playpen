@@ -1,29 +1,12 @@
 module ClockTest.Main exposing (..)
 
 import AnimationFrame
-
-
--- import Char exposing (fromCode)
-
 import Clock exposing (Clock)
-import Html exposing (Html, button, div, p, text, span, Attribute)
-
-
--- import Html.Attributes exposing (..)
--- import Html.Events exposing (keyCode, on, onClick)
--- import Json.Decode as Json
-
+import ClockTest.Model exposing (Model, init, Msg(..))
+import ClockTest.View exposing (display)
+import Html exposing (Html)
 import Keyboard exposing (..)
 import ClockTest.Physics as Physics
-import Time exposing (Time)
-
-
--- 30 FPS
-
-
-gameLoopPeriod : Time.Time
-gameLoopPeriod =
-    33 * Time.millisecond
 
 
 main : Program Never Model Msg
@@ -49,24 +32,6 @@ subscriptions model =
         , Keyboard.ups KeyUp
         , AnimationFrame.diffs TimeDelta
         ]
-
-
-
--- MODEL
-
-
-type alias Model =
-    { clock : Clock
-    , physics : Physics.Physics
-    }
-
-
-init : ( Model, Cmd Msg )
-init =
-    { clock = Clock.withPeriod gameLoopPeriod
-    , physics = Physics.init
-    }
-        ! []
 
 
 
@@ -102,17 +67,6 @@ update msg model =
                 { model | physics = newPhysics } ! []
 
 
-type Msg
-    = KeyDown Int
-    | KeyUp Int
-    | TimeDelta Time
-
-
 view : Model -> Html Msg
 view model =
-    div []
-        [ div [] [ text "hello" ]
-        , div [] [ text <| "Velocity: " ++ (toString model.physics.velocity) ]
-        , div [] [ text <| "Position: " ++ (toString model.physics.location) ]
-        , div [] [ text <| "Keys: " ++ (toString model.physics.keys) ]
-        ]
+    display model.physics
