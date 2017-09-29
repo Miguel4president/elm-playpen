@@ -50,6 +50,47 @@ predictSingle string int markov =
         Nothing
 
 
+
+-- Filter map and extracted fxns
+
+
+predLength : Prediction -> Int
+predLength (Prediction string _ _) =
+    String.length string
+
+
+inputIntoPrediction : String -> Int -> Maybe Prediction
+inputIntoPrediction input order =
+    order
+        |> buildMarkov input
+        |> predictSingle input order
+
+
+createPrediction2 : String -> Maybe Prediction
+createPrediction2 input =
+    [ 6, 5, 4, 3, 2, 1 ]
+        |> List.filterMap (inputIntoPrediction input)
+        |> List.sortBy predLength
+        |> List.head
+
+
+
+-- Get your fold on!
+-- neva' ulewais
+
+
+emptyPrediction : Prediction
+emptyPrediction =
+    Prediction "" 0 (Markov "" 0)
+
+
+createPrediction3 : String -> Prediction
+createPrediction3 input =
+    [ 6, 5, 4, 3, 2, 1 ]
+        |> List.filterMap (inputIntoPrediction input)
+        |> List.foldr always emptyPrediction
+
+
 createPrediction : String -> Maybe ( Int, Maybe Prediction )
 createPrediction input =
     [ 6, 5, 4, 3, 2, 1 ]
@@ -72,6 +113,12 @@ view model =
     let
         manyMaybePrediction =
             createPrediction model.input
+
+        createPred2Result =
+            createPrediction2 model.input
+
+        createPred3Result =
+            createPrediction3 model.input
     in
         div []
             [ text " Here be text "
@@ -79,6 +126,14 @@ view model =
             , text "and here be the current prediction:"
             , br [] []
             , handleManyMaybes manyMaybePrediction
+            , br [] []
+            , br [] []
+            , text "A test of the createPrediction2 function: "
+            , singleMaybePred createPred2Result
+            , br [] []
+            , br [] []
+            , text "A test of the createPrediction3 function: "
+            , notEvenMaybePred createPred3Result
             ]
 
 
@@ -91,6 +146,21 @@ myInput val =
         , value val
         ]
         []
+
+
+notEvenMaybePred : Prediction -> Html Msg
+notEvenMaybePred pred =
+    div []
+        [ text "We always get a prediction."
+        , displayPrediction pred
+        ]
+
+
+singleMaybePred : Maybe Prediction -> Html Msg
+singleMaybePred mPred =
+    mPred
+        |> Maybe.map displayPrediction
+        |> Maybe.withDefault (div [] [ text "Rats, didn't get a prediction" ])
 
 
 handleManyMaybes : Maybe ( Int, Maybe Prediction ) -> Html Msg
