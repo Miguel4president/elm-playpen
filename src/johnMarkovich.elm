@@ -91,6 +91,10 @@ createPrediction3 input =
         |> List.foldr always emptyPrediction
 
 
+
+-- Example implementation
+
+
 createPrediction : String -> Maybe ( Int, Maybe Prediction )
 createPrediction input =
     [ 6, 5, 4, 3, 2, 1 ]
