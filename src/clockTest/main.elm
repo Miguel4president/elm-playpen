@@ -2,17 +2,20 @@ module ClockTest.Main exposing (..)
 
 import AnimationFrame
 import Clock exposing (Clock)
-import ClockTest.Model exposing (Model, init, Msg(..))
-import ClockTest.View exposing (display)
+import ClockTest.Model as Model exposing (Msg(..))
+import ClockTest.Location as Location
+import ClockTest.Keys as Keys
+import ClockTest.View exposing (display, playZone)
+import Html exposing (div)
 import Html exposing (Html)
 import Keyboard exposing (..)
-import ClockTest.Physics as Physics
+import Time exposing (Time)
 
 
-main : Program Never Model Msg
+main : Program Never Model.Model Msg
 main =
     Html.program
-        { init = init
+        { init = Model.init
         , view = view
         , update = update
         , subscriptions = subscriptions
@@ -23,10 +26,8 @@ main =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model.Model -> Sub Msg
 subscriptions model =
-    -- Limitations of key press
-    -- Can't handle multiple keys at once, can't do hold and add another key
     Sub.batch
         [ Keyboard.downs KeyDown
         , Keyboard.ups KeyUp
@@ -38,35 +39,31 @@ subscriptions model =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model.Model -> ( Model.Model, Cmd Msg )
 update msg model =
     case msg of
         TimeDelta dt ->
             let
-                ( clock, physics ) =
-                    Clock.update Physics.update dt model.clock model.physics
+                ( clock, newModel ) =
+                    Clock.update tick dt model.clock model
             in
-                { model
-                    | clock = clock
-                    , physics = physics
-                }
-                    ! []
+                { newModel | clock = clock } ! []
 
         KeyDown keyNum ->
-            let
-                newPhysics =
-                    Physics.updateKeys (Physics.Down keyNum) model.physics
-            in
-                { model | physics = newPhysics } ! []
+            { model | keys = Keys.updateKeys (Keys.Down keyNum) model.keys } ! []
 
         KeyUp keyNum ->
-            let
-                newPhysics =
-                    Physics.updateKeys (Physics.Up keyNum) model.physics
-            in
-                { model | physics = newPhysics } ! []
+            { model | keys = Keys.updateKeys (Keys.Up keyNum) model.keys } ! []
 
 
-view : Model -> Html Msg
-view model =
-    display model.physics
+tick : Time -> Model.Model -> Model.Model
+tick _ model =
+    Model.updateLocation model
+
+
+view : Model.Model -> Html Msg
+view ({ location } as model) =
+    div []
+        [ display model
+        , playZone (Location.unwrapLocation location)
+        ]

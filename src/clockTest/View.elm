@@ -1,28 +1,25 @@
-module ClockTest.View exposing (display)
+module ClockTest.View exposing (display, playZone)
 
-import ClockTest.Physics exposing (..)
 import ClockTest.Model exposing (Model, Msg(..))
 import Html exposing (Html, button, div, p, br, text, span, Attribute)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
 
-display : Physics -> Html Msg
-display physics =
+display : Model -> Html Msg
+display model =
     div []
         [ div [] [ Html.text "hello" ]
-        , div [] [ Html.text <| "Velocity: " ++ (toString physics.velocity) ]
-        , div [] [ Html.text <| "Position: " ++ (toString physics.location) ]
-        , div [] [ Html.text <| "Keys: " ++ (toString physics.keys) ]
+        , div [] [ Html.text <| "Position: " ++ (toString model.location) ]
+        , div [] [ Html.text <| "Keys: " ++ (toString model.keys) ]
         , br [] []
-        , simpleContainer physics
         ]
 
 
-simpleContainer : Physics -> Html Msg
-simpleContainer physics =
+playZone : { x : Float, y : Float } -> Html msg
+playZone { x, y } =
     div [ class "play-zone" ]
         [ Svg.svg [ Svg.Attributes.viewBox "0 0 100 100", Svg.Attributes.width "300px" ]
-            [ circle [ cx "50", cy "50", r "5", stroke "blue", fill "blue" ] []
+            [ circle [ cx <| toString x, cy <| toString y, r "5", stroke "blue", fill "blue" ] []
             ]
         ]

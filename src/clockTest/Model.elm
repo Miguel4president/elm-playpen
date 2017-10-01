@@ -1,7 +1,8 @@
 module ClockTest.Model exposing (..)
 
 import Clock exposing (Clock)
-import ClockTest.Physics as Physics
+import ClockTest.Location as Location
+import ClockTest.Keys as Keys
 import Time exposing (Time)
 
 
@@ -21,13 +22,52 @@ type Msg
 
 type alias Model =
     { clock : Clock
-    , physics : Physics.Physics
+    , keys : Keys.Keys
+    , location : Location.Location
     }
 
 
 init : ( Model, Cmd Msg )
 init =
     { clock = Clock.withPeriod gameLoopPeriod
-    , physics = Physics.init
+    , keys = Keys.init
+    , location = Location.init
     }
         ! []
+
+
+updateLocation : Model -> Model
+updateLocation { clock, keys, location } =
+    let
+        vector =
+            buildVector keys
+    in
+        location
+            |> Location.applyVector vector
+            |> Model clock keys
+
+
+buildVector : Keys.Keys -> Location.Vector
+buildVector keys =
+    let
+        x =
+            0
+                |> addIfTrue keys.right 1
+                |> addIfTrue keys.left -1
+
+        y =
+            0
+                |> addIfTrue keys.up -1
+                |> addIfTrue keys.down 1
+    in
+        { dx = Location.Magnitude x
+        , dy = Location.Magnitude y
+        }
+
+
+addIfTrue : Bool -> Float -> Float -> Float
+addIfTrue isTrue delta current =
+    if isTrue then
+        current + delta
+    else
+        current
